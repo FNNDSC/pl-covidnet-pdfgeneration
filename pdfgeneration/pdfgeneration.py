@@ -66,6 +66,12 @@ class Pdfgeneration(ChrisApp):
         Define the CLI arguments accepted by this plugin app.
         Use self.add_argument to specify a new app argument.
         """
+        self.add_argument('--dir',
+        	dest = 'dir',
+        	type = str,
+        	optional = True,
+        	default = '',
+        	help = 'directory')
         self.add_argument('--imagefile', 
             dest         = 'imagefile', 
             type         = str, 
@@ -84,11 +90,17 @@ class Pdfgeneration(ChrisApp):
         """
         print(Gstr_title)
         print('Version: %s' % self.get_version())
+        
+        
+        directory = options.dir
+        parent_dir = options.inputdir
+        nPath = os.path.join(parent_dir , directory)
+        
         # fetch input data
-        with open('{}/prediction-default.json'.format(options.inputdir)) as f:
+        with open('{}/prediction-default.json'.format(nPath)) as f:
           classification_data = json.load(f)
         try: 
-            with open('{}/severity.json'.format(options.inputdir)) as f:
+            with open('{}/severity.json'.format(nPath)) as f:
                 severityScores = json.load(f)
         except:
             severityScores = None
@@ -120,9 +132,11 @@ class Pdfgeneration(ChrisApp):
         # when input is a string
         for asset_file in files('pdfgeneration').joinpath('template/assets').iterdir():
             os.symlink(asset_file, path.join('/tmp', asset_file.name))
-        os.symlink(path.join(options.inputdir, options.imagefile), path.join('/tmp', options.imagefile))
+        os.symlink(path.join(nPath, options.imagefile), path.join('/tmp', options.imagefile))
 
         pdfkit.from_string(txt, path.join(options.outputdir, 'patient_analysis.pdf'))
-
     def show_man_page(self):
-        self.print_help()
+        """
+        Print the app's man page.
+        """
+        print(Gstr_synopsis)

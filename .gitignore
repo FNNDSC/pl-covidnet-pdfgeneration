@@ -9,5 +9,4 @@ htmlcov
 .idea/
 .vscode/
 
-in/
 out/
