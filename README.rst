@@ -53,3 +53,12 @@ Examples
         -v $PWD/covidnet-out:/incoming:ro -v $PWD/pdfgeneration-out:/outgoing:rw \
         fnndsc/pl-covidnet-pdfgeneration:0.2.0 pdfgeneration \
         --imagefile chest-scan.jpg --patientId 12345678 /incoming /outgoing
+
+    docker run --rm -v $(pwd)/in:/incoming -v $(pwd)/out:/outgoing \
+        jonocameron/pl-pdfgeneration pdfgeneration --imagefile "ex-covid.jpeg" --patientId "77812345" \
+        /incoming /outgoing
+
+    docker run --rm -u $(id -u)                             \
+        -v $(pwd)/in:/incoming -v $(pwd)/out:/outgoing      \
+        jonocameron/pl-tpdf tpdf --dir "41"                      \
+        --imagefile "ex-covid.jpeg" --patientId 12345678 /incoming /outgoing
