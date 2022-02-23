@@ -93,7 +93,7 @@ class Pdfgeneration(ChrisApp):
         except:
             severityScores = None
         shutil.copy('{}/prediction-default.json'.format(options.inputdir),
-                    '{}/prediction-default.json'.format(options.ouputdir))
+                    '{}/prediction-default.json'.format(options.outputdir))
 
         template_file = "pdf-covid-positive-template.html"
         if classification_data['prediction'] != "COVID-19" or severityScores is None:
