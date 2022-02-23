@@ -1,4 +1,4 @@
-#!/usr/bin/env python                                            
+#!/usr/bin/env python
 #
 # pdfgeneration ds ChRIS plugin app
 #
@@ -21,10 +21,10 @@ from chrisapp.base import ChrisApp
 
 
 Gstr_title = """
- _____ _____  _   _ ___________        _   _      _    __________________   _____                           _   _             
-/  __ \  _  || | | |_   _|  _  \      | \ | |    | |   | ___ \  _  \  ___| |  __ \                         | | (_)            
-| /  \/ | | || | | | | | | | | |______|  \| | ___| |_  | |_/ / | | | |_    | |  \/ ___ _ __   ___ _ __ __ _| |_ _  ___  _ __  
-| |   | | | || | | | | | | | | |______| . ` |/ _ \ __| |  __/| | | |  _|   | | __ / _ \ '_ \ / _ \ '__/ _` | __| |/ _ \| '_ \ 
+ _____ _____  _   _ ___________        _   _      _    __________________   _____                           _   _
+/  __ \  _  || | | |_   _|  _  \      | \ | |    | |   | ___ \  _  \  ___| |  __ \                         | | (_)
+| /  \/ | | || | | | | | | | | |______|  \| | ___| |_  | |_/ / | | | |_    | |  \/ ___ _ __   ___ _ __ __ _| |_ _  ___  _ __
+| |   | | | || | | | | | | | | |______| . ` |/ _ \ __| |  __/| | | |  _|   | | __ / _ \ '_ \ / _ \ '__/ _` | __| |/ _ \| '_ \
 | \__/\ \_/ /\ \_/ /_| |_| |/ /       | |\  |  __/ |_  | |   | |/ /| |     | |_\ \  __/ | | |  __/ | | (_| | |_| | (_) | | | |
  \____/\___/  \___/ \___/|___/        \_| \_/\___|\__| \_|   |___/ \_|      \____/\___|_| |_|\___|_|  \__,_|\__|_|\___/|_| |_|
 """
@@ -66,16 +66,16 @@ class Pdfgeneration(ChrisApp):
         Define the CLI arguments accepted by this plugin app.
         Use self.add_argument to specify a new app argument.
         """
-        self.add_argument('--imagefile', 
-            dest         = 'imagefile', 
-            type         = str, 
+        self.add_argument('--imagefile',
+            dest         = 'imagefile',
+            type         = str,
             optional     = False,
             help         = 'Name of image file submitted to the analysis')
-        self.add_argument('--patientId', 
-            dest         = 'patientId', 
-            type         = str, 
+        self.add_argument('--patientId',
+            dest         = 'patientId',
+            type         = str,
             optional     = True,
-            default      = 'not specified',
+            default      = 'XXXXXXXX',
             help         = 'Patient ID')
 
     def run(self, options):
@@ -87,13 +87,13 @@ class Pdfgeneration(ChrisApp):
         # fetch input data
         with open('{}/prediction-default.json'.format(options.inputdir)) as f:
           classification_data = json.load(f)
-        try: 
+        try:
             with open('{}/severity.json'.format(options.inputdir)) as f:
                 severityScores = json.load(f)
         except:
             severityScores = None
 
-        template_file = "pdf-covid-positive-template.html" 
+        template_file = "pdf-covid-positive-template.html"
         if classification_data['prediction'] != "COVID-19" or severityScores is None:
             template_file = "pdf-covid-negative-template.html"
 
