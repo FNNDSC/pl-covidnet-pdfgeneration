@@ -6,7 +6,7 @@ with open(path.join(path.dirname(path.abspath(__file__)), 'README.rst')) as f:
 
 setup(
     name             =   'pdfgeneration',
-    version          =   '0.2.1',
+    version          =   '0.2.2',
     description      =   'An app that takes in COVID-Net prediction results and generates PDF',
     long_description =   readme,
     author           =   'DarwinAI',
