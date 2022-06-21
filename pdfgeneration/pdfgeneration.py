@@ -12,12 +12,15 @@
 
 import os
 from os import path
+import copy
+from pathlib import Path
 import json
 import shutil
 import pdfkit
 import datetime
 from importlib.resources import files
 from chrisapp.base import ChrisApp
+from chris_plugin.mapper import PathMapper
 
 
 Gstr_title = """
@@ -66,10 +69,17 @@ class Pdfgeneration(ChrisApp):
         Define the CLI arguments accepted by this plugin app.
         Use self.add_argument to specify a new app argument.
         """
+        self.add_argument('--inputPathFilter',
+            dest         = 'inputPathFilter',
+            type         = str,
+            optional     = True,
+            default      = '**/*.jpg',
+            help         = 'Input path filter for batch mode')
         self.add_argument('--imagefile',
             dest         = 'imagefile',
             type         = str,
-            optional     = False,
+            optional     = True,
+            default      = '',
             help         = 'Name of image file submitted to the analysis')
         self.add_argument('--patientId',
             dest         = 'patientId',
@@ -84,6 +94,31 @@ class Pdfgeneration(ChrisApp):
         """
         print(Gstr_title)
         print('Version: %s' % self.get_version())
+
+        # SETUP
+        # pdfkit wkhtmltopdf is hard-coded to look in /tmp for assets
+        # when input is a string
+        for asset_file in files('pdfgeneration').joinpath('template/assets').iterdir():
+            os.symlink(asset_file, path.join('/tmp', asset_file.name))
+
+        if options.imagefile:
+            self.run_one(options)
+        else:
+            mapper = PathMapper.file_mapper(
+                input_dir=Path(options.inputdir),
+                output_dir=Path(options.outputdir),
+                glob=options.inputPathFilter
+            )
+            for sub_input, sub_output in mapper:
+                sub_options = copy.copy(options)
+                sub_options.imagefile = str(sub_input.name)
+                sub_options.patientId = sub_options.imagefile[:sub_options.imagefile.rindex('.')]
+                sub_options.inputdir = str(sub_input.parent)
+                sub_options.outputdir = str(sub_output.parent)
+                self.run_one(sub_options)
+
+    @staticmethod
+    def run_one(options):
         # fetch input data and copy to output
         with open('{}/prediction-default.json'.format(options.inputdir)) as f:
           classification_data = json.load(f)
@@ -118,13 +153,10 @@ class Pdfgeneration(ChrisApp):
             txt = txt.replace("${OPC_SEVERITY}", severityScores["Opacity severity"])
             txt = txt.replace("${OPC_EXTENT_SCORE}", severityScores['Opacity extent score'])
 
-        # pdfkit wkhtmltopdf is hard-coded to look in /tmp for assets
-        # when input is a string
-        for asset_file in files('pdfgeneration').joinpath('template/assets').iterdir():
-            os.symlink(asset_file, path.join('/tmp', asset_file.name))
-        os.symlink(path.join(options.inputdir, options.imagefile), path.join('/tmp', options.imagefile))
-
+        dst = path.join('/tmp', options.imagefile)
+        os.symlink(path.join(options.inputdir, options.imagefile), dst)
         pdfkit.from_string(txt, path.join(options.outputdir, 'patient_analysis.pdf'))
+        os.unlink(dst)
 
     def show_man_page(self):
         self.print_help()
